@@ -350,6 +350,8 @@ class AdainResBlk1d(nn.Module):
             self.pool = nn.Identity()
         else:
             self.pool = weight_norm(nn.ConvTranspose1d(dim_in, dim_in, kernel_size=3, stride=2, groups=dim_in, padding=1, output_padding=1))
+        
+        self.scale = torch.tensor(1.0 / (2 ** 0.5))
 
     def _build_weights(self, dim_in, dim_out, style_dim):
         self.conv1 = weight_norm(nn.Conv1d(dim_in, dim_out, 3, 1, 1))
@@ -377,12 +379,12 @@ class AdainResBlk1d(nn.Module):
 
     def forward(self, x, s):
         out = self._residual(x, s)
-        out = (out + self._shortcut(x)) * torch.rsqrt(torch.tensor(2))
+        out = (out + self._shortcut(x)) * self.scale
         return out
 
 
 class Decoder(nn.Module):
-    def __init__(self, dim_in, style_dim, dim_out, 
+    def __init__(self, dim_in, style_dim, dim_out,
                  resblock_kernel_sizes,
                  upsample_rates,
                  upsample_initial_channel,
