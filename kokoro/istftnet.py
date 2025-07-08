@@ -326,15 +326,26 @@ class Generator(nn.Module):
 
 
 class UpSample1d(nn.Module):
-    def __init__(self, layer_type):
+    def __init__(self, layer_type: str):
         super().__init__()
-        self.layer_type = layer_type
+        if layer_type == 'none':
+            self.upsample = nn.Identity()
+        elif layer_type == 'nearest':
+            self.upsample = NearestUpsample1d(scale_factor=2.0)
+        else:
+            raise ValueError(f"Unsupported upsample type: {layer_type}")
 
     def forward(self, x):
-        if self.layer_type == 'none':
-            return x
-        else:
-            return F.interpolate(x, scale_factor=2, mode='nearest')
+        return self.upsample(x)
+
+
+class NearestUpsample1d(nn.Module):
+    def __init__(self, scale_factor: float):
+        super().__init__()
+        self.scale_factor = scale_factor
+
+    def forward(self, x):
+        return F.interpolate(x, scale_factor=self.scale_factor, mode='nearest')
 
 
 class AdainResBlk1d(nn.Module):
