@@ -330,10 +330,8 @@ class UpSample1d(nn.Module):
         super().__init__()
         if layer_type == 'none':
             self.upsample = nn.Identity()
-        elif layer_type == 'nearest':
-            self.upsample = NearestUpsample1d(scale_factor=2.0)
         else:
-            raise ValueError(f"Unsupported upsample type: {layer_type}")
+            self.upsample = NearestUpsample1d(scale_factor=2.0)
 
     def forward(self, x):
         return self.upsample(x)
